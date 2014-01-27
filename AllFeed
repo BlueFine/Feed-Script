@@ -1,0 +1,67 @@
+TeamRedRespawn = { x = 13933, z = 14169}
+TeamBlueRespawn = { x = 27, z = 265}
+
+levelSequence = { 1,2,3,1,2,4,3,1,2,3,1,2,3,1,2,3,4,4 }
+
+SkillQ = {ready = false}
+SkillW = {ready = false}
+SkillE = {ready = false}
+SkillR = {ready = false}
+SkillGhost = {ready = false, slot = nil, name = "SummonerHaste"}
+SkillRevive = {ready = false, slot = nil, name = "SummonerRevive"}
+
+function OnLoad()
+	PrintChat("Welcome To Intentionall Feed")
+	SendChat("/all GL HF!")
+	if myHero:GetSpellData(SUMMONER_1).name:find(SkillGhost.name) then
+    SkillGhost.slot = SUMMONER_1
+  elseif myHero:GetSpellData(SUMMONER_2).name:find(SkillGhost.name) then
+    SkillGhost.slot = SUMMONER_2
+  end
+	
+	if myHero:GetSpellData(SUMMONER_1).name:find(SkillRevive.name) then
+    SkillRevive.slot = SUMMONER_1
+  elseif myHero:GetSpellData(SUMMONER_2).name:find(SkillRevive.name) then
+    SkillRevive.slot = SUMMONER_2
+  end
+	
+end
+
+function OnTick()
+	
+	if GetInGameTimer() <= 30 then
+		BuyItem(1001)
+	else
+		if GetInventorySlotItem(3117) == nil then
+			BuyItem(3117)
+		else
+			BuyItem(3086)
+			BuyItem(3046)
+		end
+	end
+	
+	
+
+	SkillGhost.ready = (SkillGhost.slot ~= nil and myHero:CanUseSpell(SkillGhost.slot) == READY)
+	SkillRevive.ready = (SkillRevive.slot ~= nil and myHero:CanUseSpell(SkillRevive.slot) == READY)
+	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
+	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
+	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
+	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
+	
+	if SkillGhost.ready and GetInGameTimer() > 60 then
+		CastSpell(SkillGhost.slot)
+	end
+	if SkillRevive.ready and GetInGameTimer() > 180 then
+		CastSpell(SkillRevive.slot)
+	end
+	
+	autoLevelSetSequence(levelSequence)
+	
+	if myHero.team ~= 200 then
+		myHero:MoveTo(TeamRedRespawn.x, TeamRedRespawn.z)
+	else
+		myHero:MoveTo(TeamBlueRespawn.x, TeamBlueRespawn.z)
+	end
+end
+
