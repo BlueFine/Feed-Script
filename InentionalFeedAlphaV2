@@ -1,0 +1,246 @@
+TeamRedRespawn = { x = 13933, z = 14169, range = 1000}
+TeamBlueRespawn = { x = 27, z = 265, range = 1050}
+
+GameTime = 0
+TimeToNextWrite = 30
+TimeToNextLaugh = 1
+LaughTime = 0
+WroteTime = 0
+
+levelSequence = { 1,2,3,1,2,4,3,1,2,3,1,2,3,1,2,3,4,4 }
+
+FunnyPhrases = { 
+	[0] = "/all Keep! Keep! Feeding! ",
+	[1] = "/all Hello World!",
+	[2] = "/all YOLO IS BULLSHIT! I LIVE ALL THE TIME",
+	[3] = "/all Feeding is my pleasure"
+ }
+
+SkillQ = {ready = false, use = false}
+SkillW = {ready = false, use = false}
+SkillE = {ready = false, use = false}
+SkillR = {ready = false, use = false}
+SkillGhost = {ready = false, slot = nil, name = "SummonerHaste"}
+SkillRevive = {ready = false, slot = nil, name = "SummonerRevive"}
+
+function OnLoad()
+	PrintChat("Welcome To Intentionall Feed")
+	
+	IFConfig = scriptConfig("Intentional Feed Config","Intentional Feed Config")
+	IFConfig:addParam("LaughRun", "Laugh While Run", SCRIPT_PARAM_ONOFF, true)
+	IFConfig:addParam("FunnyPhrasesWrite", "Write Funny Phrases", SCRIPT_PARAM_ONOFF, true)
+	IFConfig:addParam("MaxFeed", "Max Feed ", SCRIPT_PARAM_ONOFF, true)
+	
+	if myHero:GetSpellData(SUMMONER_1).name:find(SkillGhost.name) then
+		SkillGhost.slot = SUMMONER_1
+	elseif myHero:GetSpellData(SUMMONER_2).name:find(SkillGhost.name) then
+		SkillGhost.slot = SUMMONER_2
+	end
+	
+	if myHero:GetSpellData(SUMMONER_1).name:find(SkillRevive.name) then
+		SkillRevive.slot = SUMMONER_1
+	elseif myHero:GetSpellData(SUMMONER_2).name:find(SkillRevive.name) then
+		SkillRevive.slot = SUMMONER_2
+	end
+	
+	LoadChampSpellsSetting()
+	
+end
+
+function OnTick()
+	GameTime = GetInGameTimer()
+	
+	AutoBuy()
+	
+	Spells()
+	
+	if IFConfig.MaxFeed then
+		OPFeed()
+	end
+	
+	if IFConfig.FunnyPhrasesWrite then
+		WritePhrases()
+	end
+
+end
+
+function OnDraw()
+	Aqua = ARGB(0x00, 0x00, 0xFF, 0xFF)
+	DrawCircle(TeamRedRespawn.x, 100, TeamRedRespawn.z, TeamRedRespawn.range, Aqua)
+	DrawCircle(TeamBlueRespawn.x, 100, TeamBlueRespawn.z, TeamBlueRespawn.range, Aqua)
+end
+
+function WritePhrases()
+	if myHero.team ~= 200 then
+		if math.sqrt((myHero.x-TeamRedRespawn.x)*(myHero.x-TeamRedRespawn.x) + (myHero.z-TeamRedRespawn.z)*(myHero.z-TeamRedRespawn.z)) <= TeamRedRespawn.range then
+			if GameTime > WroteTime + TimeToNextWrite then 
+				SendChat("/all TOUCHDOWN!!!")
+				WroteTime = GetInGameTimer()
+			end
+		end
+	else
+		if math.sqrt((myHero.x-TeamBlueRespawn.x)*(myHero.x-TeamBlueRespawn.x) + (myHero.z-TeamBlueRespawn.z)*(myHero.z-TeamBlueRespawn.z)) <= TeamBlueRespawn.range then
+			if GameTime > WroteTime + TimeToNextWrite then 
+				SendChat("/all TOUCHDOWN!!!")
+				WroteTime = GetInGameTimer()
+			end
+		end
+	end
+	if GameTime > WroteTime + TimeToNextWrite then 
+		SendChat(FunnyPhrases[math.random(4)])
+		WroteTime = GetInGameTimer()
+	end
+	
+end
+
+function OPFeed()
+	if IFConfig.LaughRun then
+		if GameTime > LaughTime + TimeToNextLaugh then 
+			SendChat("/l")
+			LaughTime = GetInGameTimer()
+		end
+	end
+	
+	if myHero.team ~= 200 then
+		myHero:MoveTo(TeamRedRespawn.x, TeamRedRespawn.z)
+	else
+		myHero:MoveTo(TeamBlueRespawn.x, TeamBlueRespawn.z)
+	end
+end
+
+
+function Spells()
+	SkillGhost.ready = (SkillGhost.slot ~= nil and myHero:CanUseSpell(SkillGhost.slot) == READY)
+	SkillRevive.ready = (SkillRevive.slot ~= nil and myHero:CanUseSpell(SkillRevive.slot) == READY)
+	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
+	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
+	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
+	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
+	
+	if SkillGhost.ready and GetInGameTimer() > 60 then
+		CastSpell(SkillGhost.slot)
+	end
+	if SkillRevive.ready and GetInGameTimer() > 180 then
+		CastSpell(SkillRevive.slot)
+	end
+	
+	if SkillQ.ready and SkillQ.use then
+		CastSpell(_Q, myHero)
+	end
+	if SkillW.ready and SkillW.use then
+		CastSpell(_W, myHero)
+	end
+	if SkillE.ready and SkillE.use then
+		CastSpell(_E, myHero)
+	end
+	if SkillR.ready and SkillR.use then
+		CastSpell(_R, myHero)
+	end
+	
+	autoLevelSetSequence(levelSequence)
+end
+
+function AutoBuy()
+	if GetInGameTimer() <= 30 then
+		BuyItem(1001)
+	else
+		if GetInventorySlotItem(3117) == nil then
+			BuyItem(3117)
+		else
+			BuyItem(3086)
+			BuyItem(3046)
+		end
+	end
+end
+
+function LoadChampSpellsSetting()
+	if myHero.charName == "Blitzcrank" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Evelynn" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Gangplank" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Garen" then
+		SkillQ.use = true
+	end
+	
+	if myHero.charName == "Karma" then
+		SkillE.use = true
+	end
+	
+	if myHero.charName == "Kayle" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Kennen" then
+		SkillE.use = true
+	end
+	
+	if myHero.charName == "Lulu" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Master Yi" then
+		SkillR.use = true
+	end
+	
+	if myHero.charName == "Nami" then
+		SkillW.use = true
+		SkillE.use = true
+	end
+	
+	if myHero.charName == "Nunu" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Poppy" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Rammus" then
+		SkillQ.use = true
+	end
+	
+	if myHero.charName == "Ryze" then
+		SkillR.use = true
+	end
+	
+	if myHero.charName == "Shyvana" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Sivir" then
+		SkillR.use = true
+	end
+	
+	if myHero.charName == "Sona" then
+		SkillE.use = true
+	end
+	
+	if myHero.charName == "Talon" then
+		SkillR.use = true
+	end
+	
+	if myHero.charName == "Trundle" then
+		SkillW.use = true
+	end
+	
+	if myHero.charName == "Twitch" then
+		SkillQ.use = true
+	end
+	
+	if myHero.charName == "Volibear" then
+		SkillQ.use = true
+	end
+	
+	if myHero.charName == "Zilean" then
+		SkillW.use = true
+		SkillE.use = true
+	end
+end
