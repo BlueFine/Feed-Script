@@ -1,0 +1,464 @@
+--[[
+  _______  __        ______   .______        ___       __          _______.
+ /  _____||  |      /  __  \  |   _  \      /   \     |  |        /       |
+|  |  __  |  |     |  |  |  | |  |_)  |    /  ^  \    |  |       |   (----`
+|  | |_ | |  |     |  |  |  | |   _  <    /  /_\  \   |  |        \   \    
+|  |__| | |  `----.|  `--'  | |  |_)  |  /  _____  \  |  `----.----)   |   
+ \______| |_______| \______/  |______/  /__/     \__\ |_______|_______/    
+                                                                           
+]]--
+
+TeamRedRespawn = { x = 13933, z = 14169, range = 1000}
+TeamBlueRespawn = { x = 27, z = 265, range = 1050}
+
+GameTime = 0
+TimeToNextLaugh = 1
+LaughTime = 0
+
+--[[
+.______    __    __  .______          ___           _______. _______     _______.
+|   _  \  |  |  |  | |   _  \        /   \         /       ||   ____|   /       |
+|  |_)  | |  |__|  | |  |_)  |      /  ^  \       |   (----`|  |__     |   (----`
+|   ___/  |   __   | |      /      /  /_\  \       \   \    |   __|     \   \    
+|  |      |  |  |  | |  |\  \----./  _____  \  .----)   |   |  |____.----)   |   
+| _|      |__|  |__| | _| `._____/__/     \__\ |_______/    |_______|_______/    
+                                                                                 
+]]--
+
+TimeToNextWrite = 30
+WroteTime = 0
+TOUCHDOWNWroteTime = 0
+
+Phrases = { 
+    '/all Keep! Keep! Feeding! ',
+    '/all Why rushing like in CS Does not work?',
+	'/all WTF!? I CANT CONTROL MY HERO',
+    '/all YOLO IS BULLSHIT! I LIVE ALL THE TIME',
+    '/all Feeding is my pleasure',
+	'/all Honor me! And report afks',
+	'/all GG! WP!'
+ }
+ 
+ function WritePhrases()
+        if myHero.team ~= 200 then
+                if math.sqrt((myHero.x-TeamRedRespawn.x)*(myHero.x-TeamRedRespawn.x) + (myHero.z-TeamRedRespawn.z)*(myHero.z-TeamRedRespawn.z)) <= TeamRedRespawn.range then
+                        if GameTime > TOUCHDOWNWroteTime + TimeToNextWrite then 
+                                SendChat("/all TOUCHDOWN!!!")
+                                TOUCHDOWNWroteTime = GetInGameTimer()
+                        end
+                end
+        else
+                if math.sqrt((myHero.x-TeamBlueRespawn.x)*(myHero.x-TeamBlueRespawn.x) + (myHero.z-TeamBlueRespawn.z)*(myHero.z-TeamBlueRespawn.z)) <= TeamBlueRespawn.range then
+                        if GameTime > TOUCHDOWNWroteTime + TimeToNextWrite then 
+                                SendChat("/all TOUCHDOWN!!!")
+                                TOUCHDOWNWroteTime = GetInGameTimer()
+                        end
+                end
+        end
+        if GameTime > WroteTime + TimeToNextWrite then 
+                SendChat(Phrases[math.random(#Phrases)])
+                WroteTime = GetInGameTimer()
+        end
+        
+end
+ 
+ --[[
+      _______. __  ___  __   __       __          _______.
+    /       ||  |/  / |  | |  |     |  |        /       |
+   |   (----`|  '  /  |  | |  |     |  |       |   (----`
+    \   \    |    <   |  | |  |     |  |        \   \    
+.----)   |   |  .  \  |  | |  `----.|  `----.----)   |   
+|_______/    |__|\__\ |__| |_______||_______|_______/    
+                                                         
+ 
+ ]]--
+
+Q = nil
+W = nil
+E = nil
+R = nil
+
+levelSequence = { 1,2,3,1,2,4,3,1,2,3,1,2,3,1,2,3,4,4 }
+
+function NewSpell(SpellID)
+	return{
+		SpellID = SpellID,
+		UseTime = 0, 
+		CastTime = 0,
+		Ready = function(self)
+			return myHero:CanUseSpell(self.SpellID) == READY
+		end,
+		SetCastTime = function(self, CastTime)
+			self.CastTime = CastTime
+		end,
+		Cast = function(self) 
+			if self:Ready() and GameTime > self.UseTime + self.CastTime then
+				CastSpell(self.SpellID, myHero)
+				self.UseTime = GameTime
+			end
+		end
+	}
+end
+
+function LoadChampSpellsSetting()
+        if myHero.charName == "Blitzcrank" then
+            Q = NewSpell(_Q)
+        end
+        
+        if myHero.charName == "Evelynn" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Gangplank" then
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Garen" then
+            Q = NewSpell(_Q)
+        end
+        
+        if myHero.charName == "Karma" then
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Kayle" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Kennen" then
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Lulu" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Master Yi" then
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Nami" then
+            W = NewSpell(_W)
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Nunu" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Poppy" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Rammus" then
+            Q = NewSpell(_Q)
+			Q:SetCastTime(7)
+        end
+        
+        if myHero.charName == "Ryze" then
+            R = NewSpell(_R)
+        end
+        
+        if myHero.charName == "Shyvana" then
+            W = NewSpell(_W)
+        end
+        
+        if myHero.charName == "Sivir" then
+            R = NewSpell(_R)
+        end
+        
+        if myHero.charName == "Sona" then
+            E = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Talon" then
+            R = NewSpell(_R)
+        end
+        
+        if myHero.charName == "Trundle" then
+            W = NewSpell(_E)
+        end
+        
+        if myHero.charName == "Twitch" then
+			Q = NewSpell(_Q)
+			Q:SetCastTime(8)
+        end
+        
+        if myHero.charName == "Volibear" then
+            Q = NewSpell(_Q)
+        end
+        
+        if myHero.charName == "Zilean" then
+            W = NewSpell(_W)
+			E = NewSpell(_E)
+        end
+end
+
+function NewSummonerSpell(Name) 
+	return{
+		Name = Name,
+		Slot = nil,
+		UseTime = 0, 
+		CastTime = 0,
+		Target = nil,
+		Ready = function(self)
+			if self.Slot ~= nil then
+				return myHero:CanUseSpell(self.Slot) == READY
+			end
+		end,
+		SetCastTime = function(self, CastTime)
+			self.CastTime = CastTime
+		end,
+		GetSlot = function(self)
+		    if myHero:GetSpellData(SUMMONER_1).name:find(self.Name) then
+                self.Slot = SUMMONER_1
+			elseif myHero:GetSpellData(SUMMONER_2).name:find(self.Name) then
+                self.Slot = SUMMONER_2
+			end
+		end,
+		Cast = function(self) 
+			if self:Ready() and GameTime > self.UseTime + self.CastTime then
+				if self.Target ~= nil then
+					CastSpell(self.Slot, Target)
+				else
+					CastSpell(self.Slot)
+				end
+					self.UseTime = GameTime
+			end
+		end
+	}
+end
+
+SkillGhost = NewSummonerSpell("SummonerHaste")
+SkillRevive = NewSummonerSpell("SummonerRevive")
+
+function Spells()
+		
+		if SkillGhost.Slot ~= nil then
+			SkillGhost:Cast()
+		end
+		
+		if SkillRevive.Slot ~= nil then
+			SkillRevive:Cast()
+		end
+        
+        if Q ~= nil then
+            Q:Cast()
+        end
+        if W ~= nil then
+            W:Cast()
+        end
+		if E ~= nil then
+            E:Cast()
+        end
+		if R ~= nil then
+            R:Cast()
+        end
+        
+        autoLevelSetSequence(levelSequence)
+end
+
+
+--[[
+     _______. __    __    ______   .______   .______    __  .__   __.   _______ 
+    /       ||  |  |  |  /  __  \  |   _  \  |   _  \  |  | |  \ |  |  /  _____|
+   |   (----`|  |__|  | |  |  |  | |  |_)  | |  |_)  | |  | |   \|  | |  |  __  
+    \   \    |   __   | |  |  |  | |   ___/  |   ___/  |  | |  . `  | |  | |_ | 
+.----)   |   |  |  |  | |  `--'  | |  |      |  |      |  | |  |\   | |  |__| | 
+|_______/    |__|  |__|  \______/  | _|      | _|      |__| |__| \__|  \______| 
+                                                                                
+]]--
+
+function BuyItem(Item, Slot)
+	return {
+		Item = Item,
+		Slot = Slot,
+		LastBuyTime = 0,
+		NextTimeToBuy = 1,
+		Buy = function(self)
+			if GameTime > self.LastBuyTime + self.NextTimeToBuy then
+				if myHero:getInventorySlot(self.Slot) ~= self.Item.Item1ID then
+					BuyItem(self.Item.Item1ID)
+					self.LastBuyTime = GameTime
+				elseif myHero:getInventorySlot(self.Slot) == self.Item.Item1ID then
+					BuyItem(self.Item.Item2ID)
+					self.LastBuyTime = GameTime
+				end
+			end
+		end,
+		ItemBought = function(self)
+			if myHero:getInventorySlot(self.Slot) == self.Item.Item2ID then
+				return true
+			else
+				return false
+			end
+		end
+	}
+end
+
+BootsofMobility = {
+	ID = 0,
+	Name = "Boots of Mobility",
+	Item1ID = 1001,
+	Item2ID = 3117	
+}
+
+Zeal = {
+	ID = 1,
+	Name = "Zeal",
+	Item1ID = 1042,
+	Item2ID = 3086,
+}
+
+PhantomDancer = {
+	ID = 2,
+	Name = "Phantom Dancer",
+	Item1ID = 3086,
+	Item2ID = 3046
+}
+
+Zephyr = {
+	ID = 3,
+	Name = "Zephyr",
+	Item1ID = 3101,
+	Item2ID = 3172	
+}
+
+TalismanofAscension = {
+	ID = 4,
+	Name = "Talisman of Ascension",
+	Item1ID = 3096,
+	Item2ID = 3069
+}
+
+YoumuusGhostblade = {
+	ID = 5,
+	Name = "Youmuu's Ghostblade",
+	Item1ID = 3134,
+	Item2ID = 3142,
+}
+
+BuyItemList = {
+	[0] = BootsofMobility,
+	[1] = Zeal,
+	[2] = PhantomDancer,
+	[3] = Zephyr,
+	[4] = TalismanofAscension,
+	[5] = YoumuusGhostblade,
+}
+
+Item1 = nil
+Item2 = nil
+Item3 = nil
+Item4 = nil
+Item5 = nil
+Item6 = nil
+
+function LoadItemsToBuy()
+	Item1 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item1Slot], ITEM_1)
+	Item2 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item2Slot], ITEM_2)
+	Item3 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item3Slot], ITEM_3)
+	Item4 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item4Slot], ITEM_4)
+	Item5 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item5Slot], ITEM_5)
+	Item6 = BuyItem(BuyItemList[IFConfig.BuyConfig.Item6Slot], ITEM_6)
+end
+
+function BuyItems()
+	if Item1:ItemBought() == false then
+		Item1:Buy()
+	elseif Item2:ItemBought() == false then
+		Item2:Buy()
+	elseif Item3:ItemBought() == false then
+		Item3:Buy()
+	elseif Item4:ItemBought() == false then
+		Item4:Buy()
+	elseif Item5:ItemBought() == false then
+		Item5:Buy()
+	elseif Item6:ItemBought() == false then
+		Item6:Buy()
+	end
+end
+
+--[[
+ _______  _______  _______  _______  
+|   ____||   ____||   ____||       \ 
+|  |__   |  |__   |  |__   |  .--.  |
+|   __|  |   __|  |   __|  |  |  |  |
+|  |     |  |____ |  |____ |  '--'  |
+|__|     |_______||_______||_______/ 
+                                     
+]]--
+
+function OPFeed()
+        if IFConfig.LaughRun then
+                if GameTime > LaughTime + TimeToNextLaugh then 
+                        SendChat("/l")
+                        LaughTime = GetInGameTimer()
+                end
+        end
+        
+        if myHero.team ~= 200 then
+                myHero:MoveTo(TeamRedRespawn.x, TeamRedRespawn.z)
+        else
+                myHero:MoveTo(TeamBlueRespawn.x, TeamBlueRespawn.z)
+        end
+end
+
+--[[
+.___  ___.      ___       __  .__   __. 
+|   \/   |     /   \     |  | |  \ |  | 
+|  \  /  |    /  ^  \    |  | |   \|  | 
+|  |\/|  |   /  /_\  \   |  | |  . `  | 
+|  |  |  |  /  _____  \  |  | |  |\   | 
+|__|  |__| /__/     \__\ |__| |__| \__| 
+                                        
+]]--
+
+function OnLoad()
+
+		SkillGhost:GetSlot()
+		SkillRevive:GetSlot()
+		
+        PrintChat("Welcome To Intentionall Feed")
+        
+        IFConfig = scriptConfig("Intentional Feed Config","Intentional Feed Config")
+			IFConfig:addSubMenu("BuyConfig", "BuyConfig")
+			IFConfig.BuyConfig:addParam("Item1Slot", "Item1", SCRIPT_PARAM_SLICE, 0, 0, 5, 0)
+			IFConfig.BuyConfig:addParam("Item2Slot", "Item2", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+			IFConfig.BuyConfig:addParam("Item3Slot", "Item3", SCRIPT_PARAM_SLICE, 2, 0, 5, 0)
+			IFConfig.BuyConfig:addParam("Item4Slot", "Item4", SCRIPT_PARAM_SLICE, 3, 0, 5, 0)
+			IFConfig.BuyConfig:addParam("Item5Slot", "Item5", SCRIPT_PARAM_SLICE, 4, 0, 5, 0)
+			IFConfig.BuyConfig:addParam("Item6Slot", "Item6", SCRIPT_PARAM_SLICE, 5, 0, 5, 0)
+		
+			IFConfig:addParam("LaughRun", "Laugh While Run", SCRIPT_PARAM_ONOFF, true)
+			IFConfig:addParam("PhrasesWrite", "Write Phrases", SCRIPT_PARAM_ONOFF, true)
+			IFConfig:addParam("MaxFeed", "Max Feed ", SCRIPT_PARAM_ONOFF, true)
+
+		
+        LoadChampSpellsSetting()
+		LoadItemsToBuy()
+end
+ 
+ 
+function OnTick()
+        GameTime = GetInGameTimer()
+		
+		BuyItems()
+        Spells()
+        
+		
+        if IFConfig.MaxFeed then
+            OPFeed()
+        end
+        
+        if IFConfig.PhrasesWrite then
+            WritePhrases()
+        end
+
+end
+
+function OnDraw()
+        Aqua = ARGB(0x00, 0x00, 0xFF, 0xFF)
+        DrawCircle(TeamRedRespawn.x, 100, TeamRedRespawn.z, TeamRedRespawn.range, Aqua)
+        DrawCircle(TeamBlueRespawn.x, 100, TeamBlueRespawn.z, TeamBlueRespawn.range, Aqua)
+end
