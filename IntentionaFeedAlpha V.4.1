@@ -277,17 +277,22 @@ function IFBuyItem(Item, Slot)
 		NextTimeToBuy = 1,
 		Buy = function(self)
 			if GameTime > self.LastBuyTime + self.NextTimeToBuy then
-				if myHero:getInventorySlot(self.Slot) ~= self.Item.Item1ID then
+				if myHero:getInventorySlot(self.Slot) ~= self.Item.Item1ID and myHero:getInventorySlot(self.Slot) ~= self.Item.Item2ID then
 					BuyItem(self.Item.Item1ID)
 					self.LastBuyTime = GameTime
-				elseif myHero:getInventorySlot(self.Slot) == self.Item.Item1ID then
+				elseif myHero:getInventorySlot(self.Slot) == self.Item.Item1ID and myHero:getInventorySlot(self.Slot) ~= self.Item.Item2ID then
 					BuyItem(self.Item.Item2ID)
+					self.LastBuyTime = GameTime
+				elseif myHero:getInventorySlot(self.Slot) == self.Item.Item2ID and self.Item.Item3ID ~= nil then
+					BuyItem(self.Item.Item3ID)
 					self.LastBuyTime = GameTime
 				end
 			end
 		end,
 		ItemBought = function(self)
-			if myHero:getInventorySlot(self.Slot) == self.Item.Item2ID then
+			if myHero:getInventorySlot(self.Slot) == self.Item.Item2ID and self.Item.Item3ID == nil then
+				return true
+			elseif self.Item.Item3ID ~= nil and myHero:getInventorySlot(self.Slot) == self.Item.Item3ID then
 				return true
 			else
 				return false
@@ -300,7 +305,8 @@ BootsofMobility = {
 	ID = 0,
 	Name = "Boots of Mobility",
 	Item1ID = 1001,
-	Item2ID = 3117	
+	Item2ID = 3117,
+	Item3ID = 3270
 }
 
 Zeal = {
